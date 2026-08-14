@@ -1,0 +1,17 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "peru-ruta-del-poder",
+  "compatibility_date": "2026-08-14",
+  "pages_build_output_dir": "dist",
+  "observability": {
+    "enabled": true
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "peru-ruta-del-poder-db",
+      "database_id": "d1565354-e6fe-401e-bb92-7ec7b4231c0b",
+      "migrations_dir": "migrations"
+    }
+  ]
+}
