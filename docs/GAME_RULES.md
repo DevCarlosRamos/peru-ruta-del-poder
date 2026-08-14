@@ -57,9 +57,35 @@ Estados: Rumor → Preliminar → Formal → Resolución. Avanzan en casillas de
 En el Tribunal se resuelven: puntaje = poder + influencia/2 + (defensa +15) + 5·1d6
 − riesgo/2. ≥50: absolución (mecánica); si no, sanción (recursos, imagen, bloqueo).
 
-## Reglas de azar
-El azar (dado y cartas) modula, pero **la estrategia manda**: los recursos y las
-decisiones pesan más que el dado en elecciones y resoluciones.
+## Cartas: mazo, mano y decisiones probabilísticas
+- El **mazo** se baraja al inicio (65+ cartas) y cada casilla roba por categoría.
+- Cuando el mazo se agota, el descarte vuelve a barajarse.
+- Las cartas **generan decisiones reales**: cada opción puede tener costo (S/ o influencia),
+  probabilidad de éxito visible (barra ████░░░░) y efectos de éxito/fallo.
+- El resultado se calcula **al momento** con el RNG de la partida (nunca está predeterminado)
+  y queda registrado en el historial (p. ej. "Jugador decide apostar S/ 100", "Riesgo: 30%",
+  "Resultado: éxito", "Jugador obtuvo +S/ 250").
+- Algunas cartas son **guardables**: puedes agregarlas a tu mano (barra inferior) y jugarlas
+  cuando decidas.
+- Categorías: oportunidad, inversión, crisis, elección, escándalo, investigación, alianza,
+  economía, proyecto, oposición, evento nacional, evento internacional, campaña, congreso y
+  decisión presidencial.
+
+## Tablero y exploración
+- 28 casillas en rejilla serpentina 7×4, todas legibles (número, icono, nombre, tipo).
+- Hover → tooltip. Click → modal de inspección (efecto, recompensas, riesgos, cartas y
+  decisiones disponibles). Botones de zoom +/−, centrar y ajustar; arrastrar para mover.
+- Botón "🗺️ Mapa": lista completa de casillas para saltar a cualquiera.
+- Botón "🔍 Inspeccionar": resalta las casillas clicables.
+
+## Historial y reglas
+- Botón "📜 Historial": crónica completa por turno.
+- Botón "📖": reglas en modal (cómo jugar, recursos, cartas, riesgo, elecciones,
+  investigaciones, victoria, derrota).
+
+## Sonido
+- Botón "🔊" para activar/desactivar (WebAudio sintetizado: dado, carta, éxito, fallo,
+  victoria, derrota).
 
 ## Victoria
 1. Mandato completo con popularidad ≥ 45.

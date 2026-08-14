@@ -1,0 +1,52 @@
+import { c, o } from './helpers';
+
+/** Cartas de CRISIS (incluye una crisis con decisión de rescate). */
+export const CRISIS_CARDS = [
+  c('cr1', 'Tres presidentes en una semana', 'crisis', 'HISTORICO',
+    'Noviembre de 2020: vértigo institucional.',
+    'Hecho histórico documentado (noviembre 2020): sucesión presidencial acelerada. En el juego: el riesgo institucional sube para todos.',
+    'Hecho de conocimiento público, redactado de forma neutral.',
+    { riesgoInstitucional: 8 }, { institucional: 8, judicial: 0 }, { impacto: 'alto' }),
+  c('cr2', 'Paro de transportistas', 'crisis', 'FICCION',
+    'La ciudad se detiene por el combustible.',
+    'Gremio ficticio paraliza el transporte. Gastas para mitigar o pierdes popularidad.',
+    'Evento ficticio.',
+    { popularidad: -5 }, { institucional: 2, judicial: 0 },
+    { impacto: 'medio', decision: { opciones: [
+      { texto: 'Negociar y gastar S/ 8', costoDinero: 8, efectosFijos: { dinero: -8 }, efectosExito: { popularidad: 2 } },
+      { texto: 'Dejar que pase', efectosFijos: { popularidad: -5 } },
+    ] } }),
+  c('cr3', 'Huelga de maestros', 'crisis', 'FICCION',
+    'Las aulas esperan.',
+    'Huelga ficticia del magisterio: pagas un bono o la popularidad se resiente.',
+    'Evento ficticio.',
+    { popularidad: -4 }, { institucional: 1, judicial: 0 },
+    { decision: { opciones: [
+      { texto: 'Pagar bono de S/ 6', costoDinero: 6, efectosFijos: { dinero: -6 }, efectosExito: { popularidad: 4 } },
+      { texto: 'Esperar', efectosFijos: { popularidad: -4 } },
+    ] } }),
+  c('cr4', 'Deslizamiento en región ficticia', 'crisis', 'FICCION',
+    'La naturaleza golpea una provincia.',
+    'Desastre natural ficticio en la provincia de Rumiñawi (ficticia). Gastas en ayuda o pierdes popularidad e influencia.',
+    'Evento ficticio.',
+    { popularidad: -4, influencia: -2 }, { institucional: 2, judicial: 0 },
+    { rareza: 'poco_comun', impacto: 'alto', decision: { opciones: [
+      { texto: 'Declarar emergencia y gastar S/ 10', costoDinero: 10, efectosFijos: { dinero: -10 }, efectosExito: { popularidad: 6 } },
+      { texto: 'Solo lamentarlo', efectosFijos: { popularidad: -4, influencia: -2 } },
+    ] } }),
+  c('cr5', 'Crisis de gabinete a las 3 a.m.', 'crisis', 'SATIRA',
+    'Nadie renunció, pero todos estuvieron a punto.',
+    'Una madrugada ficticia de teléfonos calientes y tuits borrados.',
+    'Situación satírica ficticia.',
+    { riesgoInstitucional: 5, popularidad: -2 }, { institucional: 5, judicial: 0 }, { impacto: 'medio' }),
+  c('cr6', 'Rescate bancario', 'crisis', 'FICCION',
+    'El sistema financiero (ficticio) tiembla.',
+    'Un banco ficticio pide auxilio. Decides cómo enfrentar la crisis financiera.',
+    'Situación ficticia con entidades ficticias.',
+    {}, { institucional: 3, judicial: 0 },
+    { rareza: 'poco_comun', impacto: 'alto', decision: { opciones: [
+      o('Invertir S/ 200 en el rescate (65% de recuperación → +S/400)', 200, undefined, 0.65, { dinero: -200 }, { dinero: 400 }, { dinero: -80, popularidad: -4 }),
+      o('No intervenir', undefined, undefined, undefined, { popularidad: -10 }),
+      o('Solicitar un préstamo (S/ 300 ahora, S/ 350 de deuda)', undefined, undefined, undefined, { dinero: 300, deuda: 350 }),
+    ] } }),
+];

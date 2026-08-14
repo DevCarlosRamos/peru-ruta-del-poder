@@ -1,0 +1,48 @@
+import { c, o } from './helpers';
+
+/** Cartas de OPORTUNIDAD (riesgo/recompensa guardables). */
+export const OPPORTUNITY_CARDS = [
+  c('oportunidad1', 'Oferta de un grupo empresarial', 'oportunidad', 'FICCION',
+    'Un socio anónimo quiere colaborar.',
+    'Un grupo empresarial ficticio ofrece financiamiento rápido. Tú decides el costo político.',
+    'Situación ficticia.',
+    { dinero: 25, riesgoInstitucional: 10 }, { institucional: 10, judicial: 5 },
+    { guardable: true, rareza: 'poco_comun', impacto: 'alto', decision: { opciones: [
+      { texto: 'Aceptar el financiamiento', efectosFijos: { dinero: 25 }, efectosExito: {}, efectosFallo: {}, probabilidad: 1 },
+      { texto: 'Declinar con elegancia', efectosExito: { influencia: 2 } },
+    ] } }),
+  c('oportunidad2', 'Programa de TV te invita', 'oportunidad', 'FICCION',
+    'El prime time es tuyo.',
+    'Un programa ficticio de entrevistas te da tribuna. Sube tu popularidad.',
+    'Situación ficticia.',
+    { popularidad: 8 }, undefined, { guardable: true, impacto: 'medio' }),
+  c('oportunidad3', 'Socio internacional misterioso', 'oportunidad', 'FICCION',
+    'Un fondo lejano busca oportunidades.',
+    'Un fondo de inversión ficticio propone un trato ventajoso con cláusulas turbias.',
+    'Situación ficticia.',
+    { dinero: 18, riesgoJudicial: 8 }, { institucional: 3, judicial: 8 },
+    { guardable: true, rareza: 'poco_comun', impacto: 'alto', decision: { opciones: [
+      { texto: 'Aceptar el trato', efectosFijos: { dinero: 18 }, efectosExito: {}, efectosFallo: {}, probabilidad: 1 },
+      { texto: 'Pedir documentación', efectosExito: { dinero: 6, influencia: 3 } },
+    ] } }),
+  c('oportunidad4', 'Apoyo de ONG ficticia', 'oportunidad', 'FICCION',
+    'Talleres, cascos y fotos.',
+    'Una ONG ficticia te invita a una gira. Ganas popularidad sin costo.',
+    'Situación ficticia.',
+    { popularidad: 6, influencia: 3 }, undefined, { guardable: true }),
+  c('oportunidad5', 'El arte de no hacer nada', 'oportunidad', 'SATIRA',
+    'A veces gobernar es no estorbar.',
+    'Sátira: una semana sin novedades mejora tu imagen.',
+    'Situación satírica ficticia.',
+    { popularidad: 4 }, undefined, { guardable: true }),
+  c('oportunidad6', 'El socio de riesgo', 'oportunidad', 'FICCION',
+    '¿Cuánto estás dispuesto a arriesgar?',
+    'Un grupo ficticio ofrece financiamiento escalonado: mientras más inviertes, más ganas… o más pierdes.',
+    'Situación ficticia.',
+    {}, { institucional: 4, judicial: 3 },
+    { rareza: 'poco_comun', impacto: 'alto', guardable: true, decision: { opciones: [
+      o('Invertir S/ 50 (ganancia +S/100, riesgo 15%)', 50, undefined, 0.85, { dinero: -50 }, { dinero: 100 }, { dinero: -50, popularidad: -2 }),
+      o('Invertir S/ 100 (ganancia +S/250, riesgo 30%)', 100, undefined, 0.7, { dinero: -100 }, { dinero: 250 }, { dinero: -100, popularidad: -3 }),
+      o('Invertir S/ 250 (ganancia +S/700, riesgo 50%)', 250, undefined, 0.5, { dinero: -250 }, { dinero: 700 }, { dinero: -250, popularidad: -5 }),
+    ] } }),
+];

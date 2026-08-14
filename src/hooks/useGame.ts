@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { GameEngine, RosterEntry } from '../engine/gameEngine';
 import type { GameConfig, GameState } from '../engine/types';
 import { cloneState } from '../engine/serialization';
+import { playCardFromHand } from '../engine/cards';
 import { saveGame, loadGame, clearGame } from '../storage/save';
 
 export type Screen = 'home' | 'newgame' | 'rules' | 'game' | 'result';
@@ -78,6 +79,17 @@ export function useGame() {
     [state, commit],
   );
 
+  /** Juega una carta desde la mano del jugador actual. */
+  const playHandCard = useCallback(
+    (cardId: string) => {
+      if (!state || !engineRef.current) return;
+      const next = cloneState(state);
+      playCardFromHand(next, next.currentPlayerId, cardId);
+      next.rngState = engineRef.current.rng.getState();
+      commit(next);
+    },
+    [state, commit],
+  );
   const reset = useCallback(() => {
     clearGame();
     engineRef.current = null;
@@ -100,6 +112,6 @@ export function useGame() {
     }
   }, [state]);
 
-  return { screen, state, startGame, loadSaved, advance, choose, act, reset, goTo, canContinue };
+  return { screen, state, startGame, loadSaved, advance, choose, act, playHandCard, reset, goTo, canContinue };
 }
 

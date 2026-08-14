@@ -1,0 +1,35 @@
+import { c, o } from './helpers';
+
+/** Cartas de ESCÁNDALO (suben el nivel de riesgo; nunca acusan a personas reales). */
+export const SCANDAL_CARDS = [
+  c('es1', 'Audio filtrado en reunión privada', 'escandalo', 'FICCION',
+    'Todos escucharon lo que no se dijo.',
+    'Un audio ficticio se filtra. La opinión pública se enciende. Es ficción: ningún personaje real está implicado.',
+    'Situación ficticia.',
+    { popularidad: -6, riesgoInstitucional: 8 }, { institucional: 8, judicial: 4 },
+    { rareza: 'poco_comun', impacto: 'alto', decision: { opciones: [
+      o('Control de daños (S/ 8, 75% de éxito → -5 riesgo)', 8, undefined, 0.75, { dinero: -8 }, { riesgoInstitucional: -5, popularidad: 2 }, { popularidad: -4 }),
+      o('No comentar', undefined, undefined, undefined, { popularidad: -4 }),
+    ] } }),
+  c('es2', 'Correos que viajaron solos', 'escandalo', 'FICCION',
+    'Un reenvío desafortunado.',
+    'Correos ficticios llegan a la prensa. Costo de imagen, daño institucional.',
+    'Situación ficticia.',
+    { popularidad: -5, riesgoJudicial: 6 }, { institucional: 5, judicial: 6 }, { impacto: 'alto' }),
+  c('es3', 'Boletas que no cierran', 'escandalo', 'FICCION',
+    'La contabilidad de campaña no cuadra.',
+    'Irregularidad abstracta en la contabilidad de una campaña ficticia. Sube tu nivel de riesgo.',
+    'Situación ficticia.',
+    { popularidad: -8, riesgoJudicial: 12 }, { institucional: 4, judicial: 12 },
+    { rareza: 'raro', impacto: 'alto', requiereVerificacion: 'En el mundo real: cada proceso es materia judicial; el juego no afirma nada.' }),
+  c('es4', 'Video de salón oscuro', 'escandalo', 'SATIRA',
+    'Las cámaras graban un brindis incómodo.',
+    'Sátira: un brindis con gente misteriosa en un salón oscuro da que hablar.',
+    'Situación satírica ficticia.',
+    { popularidad: -4, riesgoInstitucional: 6 }, { institucional: 6, judicial: 2 }, { impacto: 'medio' }),
+  c('es5', 'El chat que se filtró', 'escandalo', 'SATIRA',
+    'Emoji comprometedor en grupo de trabajo.',
+    'Un chat grupal ficticio se filtra y el país entero debate el significado de un emoji.',
+    'Situación satírica ficticia.',
+    { popularidad: -3, riesgoInstitucional: 4 }, { institucional: 4, judicial: 0 }),
+];

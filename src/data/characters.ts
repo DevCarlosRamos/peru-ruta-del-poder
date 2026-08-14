@@ -233,7 +233,7 @@ export const CHARACTERS: CharacterDef[] = [
       nombre: 'Sin historial',
       descripcion: 'Pierdes 5 de influencia la primera vez que sufres una crisis.',
     },
-    recursosIniciales: { dinero: 65, popularidad: 32, influencia: 25, poder: 15, apoyoPolitico: 15 },
+    recursosIniciales: { dinero: 60, popularidad: 30, influencia: 22, poder: 15, apoyoPolitico: 15 },
     dificultad: 2,
     estrategia: 'Flexible: aprovéchate de la oportunidad única y reacciona a la mesa.',
     frase: '“El Perú de 2026 merece lo mejor… y todavía estamos decidiendo quién soy.”',

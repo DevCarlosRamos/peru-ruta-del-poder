@@ -4,6 +4,7 @@ import type { AIProfileName, GameConfig, GameState, Player, PendingDecision, Pla
 import { BOARD } from '../data/board';
 import { CHARACTER_MAP } from '../data/characters';
 import { createProjects } from '../data/projects';
+import { ALL_CARD_IDS } from '../data/cards';
 import { OBJECTIVE_IDS, OBJECTIVE_MAP, checkObjective } from '../data/objectives';
 import { applyDelta, getPlayer, log, clamp } from './utils';
 import { startOfTurnEconomy, applyInflation, tickProjectsAndAlliances, checkBankruptcy } from './economy';
@@ -64,7 +65,7 @@ export class GameEngine {
       players,
       board: BOARD,
       market: [],
-      deck: [],
+      deck: rng.shuffle(ALL_CARD_IDS),
       drawPile: [],
       discardPile: [],
       hand: {},
@@ -327,7 +328,7 @@ export class GameEngine {
     switch (d.tipo) {
       case 'carta':
       case 'carta_decision':
-        applyCardChoice(state, d, op.accion ?? '');
+        applyCardChoice(state, d, op.accion ?? '', this.rng);
         break;
       case 'investigacion_resolucion':
         resolveInvestigation(state, p.id, this.rng, op.accion === 'tribunal_defiende');

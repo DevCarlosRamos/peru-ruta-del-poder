@@ -197,23 +197,35 @@ export interface TileDef {
   kind: TileKind;
   nombre: string;
   subtitulo: string;
+  /** Qué sucede al caer (efecto de juego). */
   descripcion: string;
   icono: string;
   color: string;
+  /** Categorías de cartas que puede activar esta casilla. */
+  cartas?: CardCategory[];
+  /** Posibles recompensas (texto para la inspección). */
+  recompensas?: string[];
+  /** Posibles riesgos (texto para la inspección). */
+  riesgos?: string[];
+  /** Decisiones disponibles al caer (texto para la inspección). */
+  decisiones?: string[];
 }
 
 export type CardCategory =
-  | 'evento_politico'
-  | 'evento_economico'
-  | 'crisis'
-  | 'investigacion'
-  | 'eleccion'
   | 'oportunidad'
+  | 'inversion'
+  | 'crisis'
+  | 'eleccion'
   | 'escandalo'
-  | 'proyecto'
+  | 'investigacion'
   | 'alianza'
+  | 'economia'
+  | 'proyecto'
   | 'oposicion'
-  | 'mercado'
+  | 'evento_nacional'
+  | 'evento_internacional'
+  | 'campana'
+  | 'congreso'
   | 'decision_presidencial';
 
 export interface CardDef {
@@ -223,6 +235,7 @@ export interface CardDef {
   tag: ContentTag;
   descripcion: string;
   contexto: string;
+  /** Efecto directo (cartas automáticas o "aceptar la situación"). */
   efectos: ResourceDelta;
   costo: number;
   recompensa: number;
@@ -231,8 +244,36 @@ export interface CardDef {
   rareza: Rarity;
   impacto: 'bajo' | 'medio' | 'alto';
   textoCorto: string;
-  decision?: { opciones: { texto: string; efectos: ResourceDelta }[] };
+  /** Opciones de decisión ricas (costos, probabilidades, éxito/fallo). */
+  decision?: { opciones: CardDecisionOption[] };
+  /** Probabilidad de éxito (0-1) cuando la carta tiene un único lance. */
+  probabilidad?: number;
+  /** Si es true, el jugador puede guardarla en su mano para jugarla después. */
+  guardable?: boolean;
+  /** Turnos de espera entre usos (0 = sin cooldown). */
+  cooldown?: number;
+  /** Fuente/contexto cuando aplica (cartas históricas). */
+  fuente?: string;
   requiereVerificacion?: string;
+}
+
+/** Opción de decisión de una carta (riesgo/recompensa real). */
+export interface CardDecisionOption {
+  texto: string;
+  /** Coste de dinero al elegir. */
+  costoDinero?: number;
+  /** Coste de influencia al elegir. */
+  costoInfluencia?: number;
+  /** Probabilidad de éxito (0-1). Si no se define, el efecto es determinista. */
+  probabilidad?: number;
+  /** Efectos que se aplican siempre al elegir. */
+  efectosFijos?: ResourceDelta;
+  /** Efectos si el lance tiene éxito. */
+  efectosExito?: ResourceDelta;
+  /** Efectos si el lance falla. */
+  efectosFallo?: ResourceDelta;
+  /** Meta para el motor. */
+  accion?: string;
 }
 
 /** Cambio aplicable a recursos. Solo se incluyen los que cambian. */
@@ -308,6 +349,10 @@ export interface PendingDecision {
     tag?: string;
     /** meta para que el engine aplique la lógica correspondiente */
     accion?: string;
+    /** Metadatos de riesgo/recompensa para la UI de cartas. */
+    probabilidad?: number;
+    costoDinero?: number;
+    costoInfluencia?: number;
   }[];
   cardId?: string;
   tileId?: number;

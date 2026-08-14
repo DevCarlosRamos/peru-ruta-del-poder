@@ -35,16 +35,20 @@ Monopoly ni ningún otro juego).
 
 1. Eliges un personaje (Fujimori, Toledo, García, Humala, PPK, Vizcarra, Castillo,
    Boluarte o el arquetipo ficticio "El/La Vencedor(a) 2026").
-2. **ETAPA A — Carrera política:** avanzas por el tablero de 28 casillas, acumulando
+2. **ETAPA A — Carrera política:** avanzas por el tablero "El Camino del Poder"
+   (28 casillas en rejilla serpentina, todas inspeccionables con zoom y mapa), acumulando
    dinero, popularidad, influencia, poder y apoyo político.
-3. Ganas las **elecciones** y asumes la presidencia.
-4. **ETAPA B — Gobierno:** resuelves "Decisiones presidenciales" durante tu mandato,
+3. Las **cartas** son objetos reales: cada robo genera una decisión con costo, recompensa,
+   probabilidad visible y resultado calculado al momento. Puedes **guardar cartas en tu mano**
+   y jugarlas después; el mazo se agota y el descarte se rebaraja.
+4. Ganas las **elecciones** y asumes la presidencia.
+5. **ETAPA B — Gobierno:** resuelves "Decisiones presidenciales" durante tu mandato,
    administras tu riesgo y evitas la vacancia.
-5. **Victoria:** completa tu mandato con respaldo popular, cumple tus **Objetivos de
+6. **Victoria:** completa tu mandato con respaldo popular, cumple tus **Objetivos de
    Poder**, o gana por puntuación al final de las rondas.
 
 Cada turno eliges: ¿beneficio ahora y más riesgo, o juego seguro? ¿Invierto? ¿Negocio?
-¿Construyo popularidad? ¿Me arriesgo?
+¿Construyo popularidad? ¿Me arriesgo? **RIESGO → RECOMPENSA → CONSECUENCIA.**
 
 ---
 
@@ -90,11 +94,11 @@ npm run deploy:pages
 src/
   engine/          → Motor de reglas PURO (sin React), determinista y serializable
     gameEngine.ts    Orquestador del flujo por turnos
-    types.ts         Modelo de datos (GameState)
+    types.ts         Modelo de datos (GameState, cartas con decisiones probabilísticas)
     constants.ts     Balance económico y de reglas
     rng.ts           RNG con semilla (reproducible)
     board.ts         Movimiento y resolución de casillas
-    cards.ts         Robo y resolución de cartas
+    cards.ts         Sistema de cartas: mazo real, mano, resolución central con probabilidad
     economy.ts       Ingresos, inflación, deuda, proyectos
     election.ts      Sistema electoral (1.ª y 2.ª vuelta)
     investigation.ts Sistema de investigaciones (ficticias)
@@ -104,17 +108,30 @@ src/
     turnManager.ts   Cambio de turno y rondas
     serialization.ts Serialización JSON del estado
     simulations/     Partidas automáticas y análisis de balance
-  data/            → Contenido (personajes, cartas, tablero, objetivos, activos, proyectos)
-  ui/              → Interfaz React (pantallas y componentes)
-  api/             → Cliente del API D1
-  hooks/           → useGame (puente UI ↔ motor)
-  storage/         → Persistencia local (localStorage)
+  data/
+    cards/           → Mazo por categoría (economy, crises, opportunities, investments,
+                       events, scandals, investigations, alliances, elections, opposition,
+                       projects, campaign, congress, presidential) + index.ts
+    characters.ts    Personajes con estadísticas de gameplay
+    board.ts         Tablero: 28 casillas inspeccionables (cartas, recompensas, riesgos)
+    boardLayout.ts   Rejilla serpentina 7×4 (posiciones sin solapes)
+    objectives.ts    Objetivos de Poder
+    assets.ts        Activos ficticios del mercado
+    projects.ts      Proyectos públicos ficticios
+  ui/
+    components/      GameBoard (zoom/pan/tooltip/inspección), CardModal (flip + probabilidad),
+                     Hud, PlayerHand, MapModal, HistoryModal, RulesModal, InspectTileModal…
+    screens/         Home, NewGame, Rules, Game (mesa), Result
+    sound.ts         Sonido WebAudio sintetizado (botón 🔊)
+  api/               Cliente del API D1
+  hooks/             useGame (puente UI ↔ motor)
+  storage/           Persistencia local (localStorage)
 functions/
-  api/saves.ts     → Pages Function: listar/crear guardados
-  api/saves/[id].ts→ Pages Function: leer/actualizar/borrar
-schema.sql         → Esquema de D1
-wrangler.jsonc     → Config de Cloudflare
-docs/              → Documentación del producto
+  api/saves.ts       → Pages Function: listar/crear guardados
+  api/saves/[id].ts  → Pages Function: leer/actualizar/borrar
+schema.sql           → Esquema de D1
+wrangler.jsonc       → Config de Cloudflare
+docs/                → Documentación del producto
 ```
 
 ## 📚 Documentación

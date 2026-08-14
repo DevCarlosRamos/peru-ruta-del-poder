@@ -1,0 +1,55 @@
+import { c, o } from './helpers';
+
+/** Cartas de EVENTO NACIONAL. */
+export const NATIONAL_EVENT_CARDS = [
+  c('ep1', 'Disolución del Congreso', 'evento_nacional', 'HISTORICO',
+    'El Ejecutivo disuelve el Congreso.',
+    'Hecho histórico documentado (2019): disolución del Congreso y convocatoria a nuevas elecciones parlamentarias. En el juego: tu poder crece, tu relación con el hemiciclo se rompe.',
+    'Hecho de conocimiento público. REQ-VERIFICACIÓN: detalle exacto de fechas y normas.',
+    { poder: 10, apoyoPolitico: -8, riesgoInstitucional: 6 }, { institucional: 6, judicial: 0 },
+    { rareza: 'poco_comun', impacto: 'alto' }),
+  c('ep2', 'Vacancia presidencial', 'evento_nacional', 'HISTORICO',
+    'El Congreso debate la vacancia.',
+    'Hecho histórico documentado (2020): destitución presidencial por el Congreso. En el juego: si tu apoyo político es bajo, el riesgo de caer crece.',
+    'Hecho de conocimiento público. No se atribuyen causas ni calificaciones.',
+    { poder: -5, apoyoPolitico: -5, riesgoInstitucional: 10 }, { institucional: 10, judicial: 0 },
+    { rareza: 'poco_comun', impacto: 'alto' }),
+  c('ep3', 'Toma de la Vía Expresa', 'evento_nacional', 'SATIRA',
+    'Medio país en camioneta por el carril de siempre.',
+    'Un sábado cualquiera, la ciudad entera está en la avenida. La gente aplaude a quien le promete llegar más rápido.',
+    'Situación satírica ficticia de tráfico y protestas urbanas.',
+    { popularidad: 5, influencia: -3 }, undefined, { impacto: 'medio' }),
+  c('ep4', 'Moción de censura al gabinete', 'evento_nacional', 'HISTORICO',
+    'Cae el gabinete en bloque.',
+    'Mecánica basada en el mecanismo constitucional de censura ministerial. Si tu apoyo político es bajo, pierdes poder.',
+    'Mecanismo constitucional real; situación genérica de juego.',
+    { poder: -8, apoyoPolitico: -3 }, { institucional: 4, judicial: 0 }, { impacto: 'medio' }),
+  c('ep5', 'Ministro renuncia con estilo', 'evento_nacional', 'FICCION',
+    'Renuncia por motivos personales (y redes sociales).',
+    'Un ministro ficticio renuncia en plena noche. El gabinete queda cojo una semana.',
+    'Evento ficticio, personaje ficticio.',
+    { popularidad: -4, influencia: 3 }, { institucional: 2, judicial: 0 }),
+  c('ep6', 'Cumbre de cúpulas en Miraflores', 'evento_nacional', 'SATIRA',
+    'Todos sonríen, nadie escucha.',
+    'Reunión de altas esferas en un hotel ficticio. Foto de familia perfecta; acuerdos, ninguno.',
+    'Situación satírica ficticia.',
+    { influencia: 5, popularidad: -2 }, undefined),
+];
+
+/** Cartas de EVENTO INTERNACIONAL. */
+export const INTERNATIONAL_EVENT_CARDS = [
+  c('int1', 'Cumbre internacional', 'evento_internacional', 'FICCION',
+    'Los capitales miran al país con interés.',
+    'Una cumbre ficticia atrae inversores. Aprovecha la tribuna para tejer influencia.',
+    'Situación ficticia.',
+    { influencia: 5, dinero: 4 }, undefined,
+    { guardable: true, rareza: 'poco_comun', impacto: 'medio', decision: { opciones: [
+      o('Aprovechar la tribuna', undefined, undefined, undefined, { influencia: 5, dinero: 4 }),
+      o('Buscar socios con S/ 10 (70% de éxito → +S/30)', 10, undefined, 0.7, { dinero: -10 }, { dinero: 30 }, { dinero: -10 }),
+    ] } }),
+  c('int2', 'Crisis del mercado externo', 'evento_internacional', 'FICCION',
+    'El exterior estornuda.',
+    'Una recesión ficticia en un país lejano golpea tus inversiones.',
+    'Situación ficticia.',
+    { dinero: -8 }, { institucional: 1, judicial: 0 }, { impacto: 'medio' }),
+];

@@ -40,7 +40,7 @@ function tileDecision(
   };
 }
 
-/** Alianzas base (ficticias) que se ofrecen en la casilla Alianza. */
+/** Alianzas base (ficticias) que se ofrecen en la casilla Alianza (sin carta). */
 export const ALIANZAS_BASE = [
   { nombre: 'Movimiento Regional Flor y Viento', costoInfluencia: 12, apoyo: 10, duracion: 4 },
   { nombre: 'Coalición Técnica Parlamentaria', costoInfluencia: 10, apoyo: 8, duracion: 3 },
@@ -63,49 +63,31 @@ export function resolveTile(state: GameState, rng: Rng): void {
       break;
     }
     case 'campana': {
-      tileDecision(state, p, 'Campaña electoral', 'Aprovecha la plaza pública para ganar simpatías.', [
-        { texto: 'Mitin exprés (+4 popularidad)', accion: 'campana_mitin' },
-        { texto: 'Campaña completa (S/ 10 → +12 popularidad, +4 influencia)', accion: 'campana_paga', requiereDinero: 10 },
-      ]);
+      log(state, `${p.nombre} llega a una casilla de campaña.`, 'info', p.id);
+      const card = drawCard(state, 'campana', rng);
+      if (card) resolveCard(state, card, p.id);
       break;
     }
     case 'congreso': {
-      tileDecision(state, p, 'Cabildeo en el Congreso', 'Negocia con bancadas para asegurar tu respaldo.', [
-        { texto: 'Cabildeo (5 influencia → +8 apoyo político)', accion: 'congreso_cabildeo', requiereInfluencia: 5 },
-        { texto: 'No negociar', accion: 'congreso_no' },
-      ]);
+      const card = drawCard(state, 'congreso', rng);
+      if (card) resolveCard(state, card, p.id);
       break;
     }
     case 'region': {
-      const delta: ResourceDelta = { popularidad: 5 };
+      const delta: ResourceDelta = { popularidad: p.resources.popularidad < 60 ? 6 : 4 };
       if (p.resources.popularidad < 50) delta.influencia = 2;
       applyDelta(p, delta);
       log(state, `${p.nombre} recorre la región: gana el cariño local.`, 'positivo', p.id);
       break;
     }
     case 'proyecto': {
-      const proyectos = createProjects().slice(0, 4);
-      tileDecision(state, p, 'Iniciar un proyecto público', 'Elige una obra ficticia para impulsar (costo inmediato, beneficio al completarla).', [
-        ...proyectos.map((pr) => ({
-          texto: `${pr.nombre} (S/ ${pr.costo}, ${pr.duracionTurnos} turnos, +${pr.popularidadGanada} popularidad)`,
-          accion: `proyecto_${pr.id}`,
-          requiereDinero: pr.costo,
-        })),
-        { texto: 'No iniciar proyectos', accion: 'proyecto_no' },
-      ]);
+      const card = drawCard(state, 'proyecto', rng);
+      if (card) resolveCard(state, card, p.id);
       break;
     }
-    case 'inversion':
-    case 'mercado': {
-      const ofertas = state.market.slice(0, 2);
-      tileDecision(state, p, 'Mercado de activos', 'Compra un activo para generar ingresos pasivos.', [
-        ...ofertas.map((o) => ({
-          texto: `${o.nombre} (S/ ${o.precio} → +${o.ingresoTurno}/turno)`,
-          accion: `comprar_${o.assetId}`,
-          requiereDinero: o.precio,
-        })),
-        { texto: 'No comprar', accion: 'comprar_no' },
-      ]);
+    case 'inversion': {
+      const card = drawCard(state, 'inversion', rng);
+      if (card) resolveCard(state, card, p.id);
       break;
     }
     case 'crisis': {
@@ -152,35 +134,27 @@ export function resolveTile(state: GameState, rng: Rng): void {
       break;
     }
     case 'oposicion': {
-      tileDecision(state, p, 'La oposición arremete', 'La bancada opositora lanza una ofensiva.', [
-        { texto: 'Mitigar con influencia (6 influencia → -1 apoyo)', accion: 'oposicion_mitiga', requiereInfluencia: 6 },
-        { texto: 'Aguantar el golpe (-4 apoyo político)', accion: 'oposicion_aguanta' },
-      ]);
+      const card = drawCard(state, 'oposicion', rng);
+      if (card) resolveCard(state, card, p.id);
       break;
     }
     case 'alianza': {
-      tileDecision(state, p, 'Oportunidad de alianza', 'Un grupo de interés (ficticio) ofrece un pacto.', [
-        ...ALIANZAS_BASE.map((a) => ({
-          texto: `${a.nombre} (${a.costoInfluencia} influencia → +${a.apoyo} apoyo político)`,
-          accion: `alianza_${allianceKey(a.nombre)}`,
-          requiereInfluencia: a.costoInfluencia,
-        })),
-        { texto: 'Declinar el pacto', accion: 'alianza_no' },
-      ]);
+      const card = drawCard(state, 'alianza', rng);
+      if (card) resolveCard(state, card, p.id);
       break;
     }
     case 'economia': {
-      const card = drawCard(state, 'evento_economico', rng);
+      const card = drawCard(state, 'economia', rng);
       if (card) resolveCard(state, card, p.id);
       break;
     }
     case 'evento_nacional': {
-      const card = drawCard(state, 'evento_politico', rng);
+      const card = drawCard(state, 'evento_nacional', rng);
       if (card) resolveCard(state, card, p.id);
       break;
     }
     case 'evento_internacional': {
-      const card = drawCard(state, 'mercado', rng);
+      const card = drawCard(state, 'evento_internacional', rng);
       if (card) resolveCard(state, card, p.id);
       break;
     }
@@ -215,7 +189,7 @@ export function resolveTile(state: GameState, rng: Rng): void {
   }
 }
 
-/** Inicia un proyecto elegido por el jugador. */
+/** Inicia un proyecto elegido por el jugador (desde la acción del turno). */
 export function startProject(state: GameState, playerId: string, projectId: string): boolean {
   const p = getPlayer(state, playerId);
   const base = createProjects().find((pr) => pr.id === projectId);
@@ -263,7 +237,7 @@ export function repopulateMarket(state: GameState, rng: Rng): void {
   }
 }
 
-/** Crea una alianza para el jugador (casilla Alianza). */
+/** Crea una alianza para el jugador (sin carta; acción de turno). */
 export function createAlliance(state: GameState, playerId: string, key: string): boolean {
   const p = getPlayer(state, playerId);
   const base = ALIANZAS_BASE.find((a) => allianceKey(a.nombre) === key);
@@ -286,4 +260,5 @@ export function createAlliance(state: GameState, playerId: string, key: string):
   log(state, `${p.nombre} firma alianza con "${base.nombre}" (+${apoyo} apoyo político).`, 'positivo', p.id);
   return true;
 }
+
 
