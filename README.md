@@ -14,10 +14,20 @@ Monopoly ni ningún otro juego).
 
 ## 🚀 En producción
 
-- **App:** <https://juego-de-ratas-politicas.devcarlosramos.uk>
-- **Pages (fallback):** <https://peru-ruta-del-poder.pages.dev>
+- **App:** <https://peru-ruta-del-poder.pages.dev>
 - **API de guardado en la nube:** `/api/saves` (Cloudflare Pages Functions + D1, serverless por uso)
 - **Infraestructura:** Cloudflare Pages + Pages Functions + D1
+
+> **Subdominio personalizado (pendiente de DNS):** `juego-de-ratas-politicas.devcarlosramos.uk`
+> ya está registrado en el proyecto Pages (estado `pending`). Para activarlo, crea en el
+> dashboard de Cloudflare (zona `devcarlosramos.uk`) un registro:
+>
+> ```
+> Tipo: CNAME · Nombre: juego-de-ratas-politicas · Destino: peru-ruta-del-poder.pages.dev · Proxy: activado
+> ```
+>
+> En cuanto exista el CNAME, Cloudflare activa el dominio automáticamente. No afecta a los
+> subdominios existentes (`juego.devcarlosramos.uk`, `pelea-animales.devcarlosramos.uk`).
 
 ---
 
