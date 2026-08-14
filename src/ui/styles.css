@@ -689,6 +689,12 @@ select:focus {
   line-height: 1.3;
   padding: 12px 14px;
 }
+.tutorial-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
 
 /* ===== Resultado ===== */
 .result {

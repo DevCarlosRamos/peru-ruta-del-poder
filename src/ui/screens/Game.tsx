@@ -10,6 +10,7 @@ import { DecisionModal } from '../components/DecisionModal';
 import { ElectionPanel } from '../components/ElectionPanel';
 import { CardView } from '../components/CardView';
 import { saveToCloud } from '../../api/cloudflare';
+import { TutorialOverlay } from '../components/TutorialOverlay';
 
 export function Game({ game }: { game: GameController }) {
   const { state, advance, choose, act, reset, goTo, canContinue } = game;
@@ -100,6 +101,7 @@ export function Game({ game }: { game: GameController }) {
       </div>
 
       {state.pendingDecision && <DecisionModal state={state} onChoose={choose} />}
+      {state.config.tutorial && state.ronda === 1 && state.turnoGlobal <= 2 && <TutorialOverlay />}
     </div>
   );
 }
