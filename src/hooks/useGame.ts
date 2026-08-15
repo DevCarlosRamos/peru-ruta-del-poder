@@ -60,11 +60,12 @@ export function useGame() {
     commit(next);
   }, [state, commit]);
 
-  /** Lanza el dado del jugador actual (humano): ejecuta el paso de roll del motor. */
+  /** Lanza el dado del jugador actual (humano) y resuelve la casilla. */
   const roll = useCallback(() => {
     if (!state || !engineRef.current) return;
     const next = cloneState(state);
-    engineRef.current.roll(next);
+    engineRef.current.roll(next); // stepRoll: dado + mover → fase 'casilla'
+    engineRef.current.advance(next); // resolver la casilla → 'decision' (o carta)
     next.rngState = engineRef.current.rng.getState();
     commit(next);
   }, [state, commit]);
@@ -87,6 +88,10 @@ export function useGame() {
       if (!state || !engineRef.current) return;
       const next = cloneState(state);
       engineRef.current.act(next, actionId);
+      // Tras cualquier acción del panel de turno (incluido "terminar"), el motor
+      // queda en fase 'check'. Sin avanzar, el juego se congelaba y no se podía
+      // volver a tirar el dado en el siguiente turno.
+      engineRef.current.advance(next);
       next.rngState = engineRef.current.rng.getState();
       commit(next);
     },

@@ -46,11 +46,8 @@ test('juega un turno completo (turno → dado → casilla → decisión)', async
   await page.getByRole('button', { name: /Comenzar turno/ }).click();
   // 2) Tirar el dado (el botón cambia tras comenzar el turno).
   await page.getByRole('button', { name: /Tirar el dado/ }).click();
-  // La animación del dado aparece.
-  await expect(page.locator('.dice-anim').first()).toBeVisible({ timeout: 4000 });
-
-  // 3) La ficha se mueve casilla por casilla; el dado aterriza.
-  await expect(page.locator('.dice-anim.settled').first()).toBeVisible({ timeout: 15_000 });
+  // El número del dado se muestra de forma estática.
+  await expect(page.locator('.dice-static .dice-face').first()).toBeVisible({ timeout: 8000 });
 
   // 4) Puede aparecer una carta (CardModal) o una decisión de casilla (DecisionModal).
   //    Si aparece algo, elegimos la primera opción y continuamos.
@@ -64,10 +61,19 @@ test('juega un turno completo (turno → dado → casilla → decisión)', async
     await page.screenshot({ path: 'e2e-2-sin-carta.png' });
   }
 
-  // 5) Terminar el turno si está disponible.
+  // 5) Terminar el turno si está disponible (avanza al siguiente jugador).
   const terminar = page.getByRole('button', { name: /Terminar turno/ });
   if (await terminar.count()) {
     await terminar.first().click();
+  }
+
+  // 6) Si al terminar se convocó una elección, resolver la campaña del siguiente.
+  try {
+    const camp = page.locator('.modal-options .btn-option').first();
+    await camp.waitFor({ timeout: 4000 });
+    await camp.click();
+  } catch {
+    // sin campaña pendiente
   }
 
   // El tablero sigue presente y el historial abre.

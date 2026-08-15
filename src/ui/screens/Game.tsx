@@ -1,8 +1,7 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { GameController } from '../../App';
 import type { TileDef } from '../../engine/types';
 import { getPlayer } from '../../engine/utils';
-import { BOARD_SIZE } from '../../data/board';
 import { GameBoard } from '../components/GameBoard';
 import { Hud } from '../components/Hud';
 import { PlayerPanel } from '../components/PlayerPanel';
@@ -20,11 +19,6 @@ import { TutorialOverlay } from '../components/TutorialOverlay';
 import { saveToCloud } from '../../api/cloudflare';
 import { playSound, toggleSound, isSoundEnabled } from '../sound';
 
-interface RollAnim {
-  dado: number;
-  casillas: number[];
-}
-
 /** Pantalla de partida: "mesa de juego" con el tablero como protagonista. */
 export function Game({ game }: { game: GameController }) {
   const { state, advance, choose, act, playHandCard, reset, canContinue, roll } = game;
@@ -35,53 +29,18 @@ export function Game({ game }: { game: GameController }) {
   const [verReglas, setVerReglas] = useState(false);
   const [sonido, setSonido] = useState(isSoundEnabled());
   const [guardando, setGuardando] = useState(false);
-  const [rollAnim, setRollAnim] = useState<RollAnim | null>(null);
   const [cartaVisible, setCartaVisible] = useState(false);
-  const posRef = useRef<number | null>(null);
-  const rollPendiente = useRef(false);
-  const lastPlayerRef = useRef<string | null>(null);
 
   if (!state) return null;
   const current = getPlayer(state, state.currentPlayerId);
   const esHumano = current.kind === 'humano';
 
-  // Inicializa la referencia de posición.
+  // Mantiene el CardModal montado durante la resolución (pendingDecision → null).
   useEffect(() => {
-    if (posRef.current === null) posRef.current = current.position;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Detecta el cambio de posición tras lanzar el dado y anima el recorrido.
-  useEffect(() => {
-    if (lastPlayerRef.current !== current.id) {
-      lastPlayerRef.current = current.id;
-      posRef.current = current.position;
-      return;
-    }
-    if (!rollPendiente.current) return;
-    if (posRef.current === null || posRef.current === current.position) return;
-    const antes = posRef.current;
-    const despues = current.position;
-    const ruta: number[] = [];
-    let paso = antes;
-    while (paso !== despues) {
-      paso = (paso + 1) % BOARD_SIZE;
-      ruta.push(paso);
-    }
-    const ultimo = [...state.log].reverse().find((l) => l.mensaje.includes('lanza el dado'));
-    const m = ultimo?.mensaje.match(/dado:\s*(\d+)/);
-    const dado = m ? Number(m[1]) : ruta.length;
-    posRef.current = despues;
-    rollPendiente.current = false;
-    setRollAnim({ dado, casillas: ruta });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.turnoGlobal, current.position, state.log.length]);
-
-  const lanzarDado = () => {
-    rollPendiente.current = true;
-    roll();
-  };
-
+    const esCarta =
+      state?.pendingDecision?.tipo === 'carta' || state?.pendingDecision?.tipo === 'carta_decision';
+    if (esCarta) setCartaVisible(true);
+  }, [state?.pendingDecision?.id]);
 
   const botonTurno =
     state.phase === 'turno_inicio'
@@ -91,6 +50,11 @@ export function Game({ game }: { game: GameController }) {
           ? 'Gobernar el país'
           : 'Tirar el dado 🎲'
         : null;
+
+  const tirarDado = () => {
+    playSound('dado');
+    roll();
+  };
 
   const guardarNube = async () => {
     setGuardando(true);
@@ -110,15 +74,6 @@ export function Game({ game }: { game: GameController }) {
     playSound('click');
     choose(i);
   };
-
-  const finRoll = useCallback(() => setRollAnim(null), []);
-
-  // Mantiene el CardModal montado durante la resolución (pendingDecision → null).
-  useEffect(() => {
-    const esCarta =
-      state?.pendingDecision?.tipo === 'carta' || state?.pendingDecision?.tipo === 'carta_decision';
-    if (esCarta) setCartaVisible(true);
-  }, [state?.pendingDecision?.id]);
 
   return (
     <div className="game-table">
@@ -146,14 +101,14 @@ export function Game({ game }: { game: GameController }) {
         </aside>
 
         <main className="table-center">
-          <GameBoard state={state} onInspect={setInspectTile} rollAnim={rollAnim} onRollFin={finRoll} modoInspeccion={modoInspeccion} />
+          <GameBoard state={state} onInspect={setInspectTile} modoInspeccion={modoInspeccion} />
 
           <div className="turn-bar">
             <span className="turn-fase">
               Fase: <strong>{state.phase.replace('_', ' ')}</strong>
             </span>
             {botonTurno && esHumano && (
-              <button className="btn btn-primary btn-big" onClick={() => (state.phase === 'roll' ? lanzarDado() : advance())}>
+              <button className="btn btn-primary btn-big" onClick={() => (state.phase === 'roll' ? tirarDado() : advance())}>
                 {botonTurno}
               </button>
             )}
@@ -180,8 +135,8 @@ export function Game({ game }: { game: GameController }) {
 
       <PlayerHand state={state} onPlay={playHandCard} />
 
-      {!rollAnim && cartaVisible && <CardModal state={state} onChoose={decidir} onClose={() => setCartaVisible(false)} />}
-      {!rollAnim && state.pendingDecision && !cartaVisible && <DecisionModal state={state} onChoose={decidir} />}
+      {cartaVisible && <CardModal state={state} onChoose={decidir} onClose={() => setCartaVisible(false)} />}
+      {state.pendingDecision && !cartaVisible && <DecisionModal state={state} onChoose={decidir} />}
       {inspectTile && <InspectTileModal tile={inspectTile} onClose={() => setInspectTile(null)} />}
       {verMapa && (
         <MapModal
@@ -192,7 +147,7 @@ export function Game({ game }: { game: GameController }) {
       )}
       {verHistorial && <HistoryModal state={state} onClose={() => setVerHistorial(false)} />}
       {verReglas && <RulesModal onClose={() => setVerReglas(false)} />}
-      {state.config.tutorial && state.ronda === 1 && state.turnoGlobal <= 2 && !rollAnim && <TutorialOverlay />}
+      {state.config.tutorial && state.ronda === 1 && state.turnoGlobal <= 2 && <TutorialOverlay />}
     </div>
   );
 }

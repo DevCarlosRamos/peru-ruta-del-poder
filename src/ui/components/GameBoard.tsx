@@ -1,22 +1,14 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import type { GameState, TileDef } from '../../engine/types';
 import { getPlayer } from '../../engine/utils';
 import { CHARACTER_MAP } from '../../data/characters';
 import { BOARD_LAYOUT, slotToPercent } from '../../data/boardLayout';
 import { deckCounters } from '../../engine/cards';
 import { CATEGORY_STYLE } from '../../data/cards';
-import { playSound } from '../sound';
-
-interface RollAnim {
-  dado: number;
-  casillas: number[];
-}
 
 interface Props {
   state: GameState;
   onInspect: (tile: TileDef) => void;
-  rollAnim: RollAnim | null;
-  onRollFin: () => void;
   modoInspeccion: boolean;
 }
 
@@ -29,43 +21,29 @@ const TILE_KIND_LABEL: Record<string, string> = {
   elecciones: 'ELECCIONES', palacio: 'PALACIO',
 };
 
-/** Tablero "El Camino del Poder" en rejilla serpentina con zoom/pan, tooltips e inspección. */
-export function GameBoard({ state, onInspect, rollAnim, onRollFin, modoInspeccion }: Props) {
+/**
+ * Tablero "El Camino del Poder" en rejilla serpentina con zoom/pan, tooltips
+ * e inspección. El dado se muestra como un número estático (sin animación).
+ */
+export function GameBoard({ state, onInspect, modoInspeccion }: Props) {
   const current = getPlayer(state, state.currentPlayerId);
   const [zoom, setZoom] = useState(0.85);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [tooltip, setTooltip] = useState<{ tile: TileDef; x: number; y: number } | null>(null);
-  const [posAnimada, setPosAnimada] = useState<number | null>(null);
-  const [dadoVisible, setDadoVisible] = useState<{ dado: number; animando: boolean } | null>(null);
   const drag = useRef<{ x: number; y: number; px: number; py: number } | null>(null);
   const contadores = deckCounters(state);
 
-  // Animación de movimiento: la ficha recorre la ruta casilla por casilla.
-  useEffect(() => {
-    if (!rollAnim) return;
-    let i = 0;
-    setDadoVisible({ dado: rollAnim.dado, animando: true });
-    playSound('dado');
-    const timer = setInterval(() => {
-      i += 1;
-      if (i <= rollAnim.casillas.length) {
-        setPosAnimada(rollAnim.casillas[i - 1]);
-        playSound('click');
-      } else {
-        clearInterval(timer);
-        setDadoVisible((d) => (d ? { ...d, animando: false } : d));
-        setPosAnimada(null);
-        onRollFin();
+  // Número del último dado del jugador actual (se muestra "como si acabara de salir").
+  const ultimoDado = (() => {
+    for (let i = state.log.length - 1; i >= 0; i--) {
+      const l = state.log[i];
+      if (l.jugadorId === current.id && l.mensaje.includes('lanza el dado')) {
+        const m = l.mensaje.match(/dado:\s*(\d+)/);
+        if (m) return Number(m[1]);
       }
-    }, 320);
-    return () => clearInterval(timer);
-  }, [rollAnim, onRollFin]);
-
-  const posicionDe = (playerId: string, position: number) => {
-    const p = state.players.find((x) => x.id === playerId);
-    if (!p) return position;
-    return p.id === current.id && posAnimada !== null ? posAnimada : position;
-  };
+    }
+    return null;
+  })();
 
   const zoomEn = (delta: number) => setZoom((z) => Math.max(0.45, Math.min(2.2, z + delta)));
   const centrar = () => { setZoom(1); setPan({ x: 0, y: 0 }); };
@@ -106,10 +84,16 @@ export function GameBoard({ state, onInspect, rollAnim, onRollFin, modoInspeccio
             <span className="deck-counter" title="Descarte">🗑️ {contadores.descarte}</span>
             <span className="deck-counter" title="Cartas en manos">✋ {contadores.mano}</span>
           </div>
+          {ultimoDado !== null && (
+            <div className="dice-static" key={`d${state.turnoGlobal}-${ultimoDado}`} title="Último dado">
+              <span className="dice-face">{ultimoDado}</span>
+            </div>
+          )}
+
           {state.board.map((t, i) => {
             const slot = BOARD_LAYOUT[i];
             const { x, y } = slotToPercent(slot);
-            const fichas = state.players.filter((pl) => posicionDe(pl.id, pl.position) === i && !pl.eliminado);
+            const fichas = state.players.filter((pl) => pl.position === i && !pl.eliminado);
             const estilo = CATEGORY_STYLE[t.cartas?.[0] as keyof typeof CATEGORY_STYLE] ?? { color: t.color, icono: t.icono };
             return (
               <div
@@ -141,11 +125,6 @@ export function GameBoard({ state, onInspect, rollAnim, onRollFin, modoInspeccio
               </div>
             );
           })}
-          {dadoVisible && (
-            <div className={`dice-anim ${dadoVisible.animando ? 'tumbling' : 'settled'}`}>
-              <span className="dice-face">{dadoVisible.dado}</span>
-            </div>
-          )}
         </div>
 
         {tooltip && (
@@ -158,3 +137,4 @@ export function GameBoard({ state, onInspect, rollAnim, onRollFin, modoInspeccio
     </div>
   );
 }
+

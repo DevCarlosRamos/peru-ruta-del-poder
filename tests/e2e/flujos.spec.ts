@@ -235,3 +235,92 @@ test('inspección, mapa y zoom sin errores', async ({ page }) => {
   expect(erroresReales(errores)).toEqual([]);
 });
 
+
+test('el dado se puede tirar en cada turno (regresión del botón de dado)', async ({ page }) => {
+  const errores: string[] = [];
+  capturarErrores(page, errores);
+  const s = nuevoEstado(31);
+  // Asegurar que el humano (Test A) empieza la partida.
+  s.players[0].orden = 1;
+  s.players[1].orden = 2;
+  s.currentPlayerId = s.players[0].id;
+  s.phase = 'turno_inicio';
+  await cargarEstado(page, s);
+
+  // Turno 1 del humano: comenzar → tirar el dado → el número se muestra.
+  await page.getByRole('button', { name: /Comenzar turno/ }).click();
+  await page.getByRole('button', { name: /Tirar el dado/ }).click();
+  await expect(page.locator('.dice-static .dice-face')).toBeVisible({ timeout: 8000 });
+
+  // Resolver la carta/decisión que aparezca (si aparece).
+  try {
+    await page.locator('.card-options .btn-option, .modal-options .btn-option').first().waitFor({ timeout: 4000 });
+    await page.locator('.card-options .btn-option, .modal-options .btn-option').first().click();
+    const continuar = page.getByRole('button', { name: /Continuar/ }).first();
+    await continuar.waitFor({ timeout: 10_000 });
+    await continuar.click();
+  } catch {
+    // sin carta: seguir
+  }
+
+  // Terminar el turno del humano (puede convocar una elección).
+  try {
+    const terminar = page.getByRole('button', { name: /Terminar turno/ }).first();
+    await terminar.waitFor({ timeout: 4000 });
+    await terminar.click();
+  } catch {
+    // ya se terminó por otra vía
+  }
+
+  // Avanzar (modales → IA → turnos) hasta que el humano pueda actuar de nuevo.
+  let intentos = 0;
+  while (intentos++ < 24) {
+    const tirar = page.getByRole('button', { name: /Tirar el dado/ });
+    const gobernar = page.getByRole('button', { name: /Gobernar el país/ });
+    if ((await tirar.count()) || (await gobernar.count())) break;
+
+    // 1) Resolver primero cualquier modal pendiente (campaña/carta/decisión).
+    const opcion = page.locator('.card-options .btn-option, .modal-options .btn-option').first();
+    if (await opcion.count()) {
+      await opcion.click();
+      const cont = page.getByRole('button', { name: /Continuar/ }).first();
+      if (await cont.count()) {
+        await cont.click();
+      }
+      await page.waitForTimeout(250);
+      continue;
+    }
+    // 2) Comenzar turno del humano.
+    const comenzar = page.getByRole('button', { name: /Comenzar turno/ });
+    if ((await comenzar.count()) && (await comenzar.isVisible())) {
+      await comenzar.click();
+      continue;
+    }
+    // 3) Avanzar la IA.
+    const contIA = page.getByRole('button', { name: /Continuar \(IA\)/ });
+    if ((await contIA.count()) && (await contIA.isVisible())) {
+      await contIA.click();
+      await page.waitForTimeout(180);
+      continue;
+    }
+    await page.waitForTimeout(250);
+  }
+
+  // ¡El humano debe poder actuar en su segundo turno!
+  const tirar = page.getByRole('button', { name: /Tirar el dado/ });
+  const gobernar = page.getByRole('button', { name: /Gobernar el país/ });
+  if (await tirar.count()) {
+    await tirar.click();
+    await expect(page.locator('.dice-static .dice-face')).toBeVisible({ timeout: 8000 });
+  } else if (await gobernar.count()) {
+    await gobernar.click();
+    // El presidente resuelve una decisión presidencial (carta o panel).
+    await expect(
+      page.locator('.card-options .btn-option, .modal-options .btn-option, .actions-grid .btn').first(),
+    ).toBeVisible({ timeout: 8000 });
+  } else {
+    throw new Error('El humano no tiene botón de turno en su segundo turno');
+  }
+  expect(erroresReales(errores)).toEqual([]);
+});
+

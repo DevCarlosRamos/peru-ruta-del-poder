@@ -206,13 +206,18 @@
 }
 
 /* ===== Dado ===== */
-.dice-anim {
+.dice-static {
   position: absolute;
   left: 50%;
-  top: 46%;
+  top: 44%;
   transform: translate(-50%, -50%);
   z-index: 20;
   pointer-events: none;
+  animation: dado-pop 0.35s ease-out;
+}
+@keyframes dado-pop {
+  0% { transform: translate(-50%, -50%) scale(1.5); opacity: 0.3; }
+  100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
 }
 .dice-face {
   display: inline-flex;
@@ -226,23 +231,6 @@
   font-size: 40px;
   font-weight: 900;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
-}
-.dice-anim.tumbling .dice-face {
-  animation: tumba 0.5s steps(6) infinite;
-}
-@keyframes tumba {
-  0% { transform: rotate(0deg) scale(1); }
-  25% { transform: rotate(90deg) scale(0.85); }
-  50% { transform: rotate(180deg) scale(1); }
-  75% { transform: rotate(270deg) scale(0.9); }
-  100% { transform: rotate(360deg) scale(1); }
-}
-.dice-anim.settled .dice-face {
-  animation: aterrizar 0.35s ease-out;
-}
-@keyframes aterrizar {
-  0% { transform: scale(1.6) rotate(12deg); opacity: 0.4; }
-  100% { transform: scale(1) rotate(0deg); opacity: 1; }
 }
 
 /* ===== HUD ===== */
