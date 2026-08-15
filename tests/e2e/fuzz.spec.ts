@@ -25,6 +25,15 @@ async function jugarPartidaCompleta(page: import('@playwright/test').Page, error
   await page.getByRole('button', { name: /Comenzar la campaña/ }).click();
   await expect(page.locator('.board-area')).toBeVisible();
 
+  // La partida NO puede ganarse de inmediato: tras el primer avance IA,
+  // la pantalla de resultado no debe aparecer todavía.
+  const primerAvance = page.getByRole('button', { name: /Continuar \(IA\)/ });
+  if ((await primerAvance.count()) && (await primerAvance.isVisible())) {
+    await primerAvance.click();
+    await page.waitForTimeout(800);
+    expect(await page.locator('.result-hero').count()).toBe(0);
+  }
+
   // Avanzar hasta el resultado o hasta el límite de intentos.
   let guard = 0;
   let alResultado = false;

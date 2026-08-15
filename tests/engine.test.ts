@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { GameEngine } from '../src/engine/gameEngine';
 import type { GameState } from '../src/engine/types';
-import { serializeState, deserializeState } from '../src/engine/serialization';
+import { serializeState, deserializeState, esPartidaEnCurso, cloneState } from '../src/engine/serialization';
 import { computeScore } from '../src/engine/score';
 import { openInvestigation, resolveInvestigation } from '../src/engine/investigation';
 import { startElection, chooseCampaign } from '../src/engine/election';
@@ -188,6 +188,26 @@ describe('Motor — serialización y determinismo', () => {
     g2.engine.advance(g2.state);
     expect(g1.state.players[0].resources.dinero).toBe(g2.state.players[0].resources.dinero);
     expect(g1.state.log.length).toBe(g2.state.log.length);
+  });
+
+  it('esPartidaEnCurso rechaza guardados antiguos y partidas terminadas (victoria fantasma)', () => {
+    const { state } = makeGame();
+    expect(state.version).toBe(2);
+    expect(esPartidaEnCurso(state)).toBe(true);
+
+    const conWinner = cloneState(state);
+    conWinner.winner = { playerId: state.players[0].id, motivo: 'objetivos', puntos: 1 };
+    expect(esPartidaEnCurso(conWinner)).toBe(false);
+
+    const versionVieja = cloneState(state);
+    versionVieja.version = 1;
+    expect(esPartidaEnCurso(versionVieja)).toBe(false);
+
+    const terminada = cloneState(state);
+    terminada.phase = 'fin_partida';
+    expect(esPartidaEnCurso(terminada)).toBe(false);
+
+    expect(esPartidaEnCurso(null)).toBe(false);
   });
 });
 

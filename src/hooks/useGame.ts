@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { GameEngine, RosterEntry } from '../engine/gameEngine';
 import type { GameConfig, GameState } from '../engine/types';
-import { cloneState } from '../engine/serialization';
+import { cloneState, esPartidaEnCurso } from '../engine/serialization';
 import { playCardFromHand } from '../engine/cards';
 import { saveGame, loadGame, clearGame } from '../storage/save';
 
@@ -37,6 +37,11 @@ export function useGame() {
   const loadSaved = useCallback(() => {
     const s = loadGame();
     if (!s) return false;
+    // Nunca cargar un guardado antiguo, terminado o corrupto (evita "victoria fantasma").
+    if (!esPartidaEnCurso(s)) {
+      clearGame();
+      return false;
+    }
     // Restaurar la semilla y el estado del RNG si existen.
     const seed = s.config.seed;
     const engine = new GameEngine(seed);

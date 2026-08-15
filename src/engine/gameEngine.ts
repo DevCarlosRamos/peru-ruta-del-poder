@@ -68,7 +68,7 @@ export class GameEngine {
     }
 
     const state: GameState = {
-      version: 1,
+      version: 2,
       id: `partida_${config.seedLabel}_${Date.now().toString(36)}`,
       config,
       ronda: 1,
@@ -154,15 +154,17 @@ export class GameEngine {
 
   /**
    * Avanza el flujo de la partida un paso (o varios, mientras no se requiera
-   * la decisión de un jugador humano).
+   * la decisión de un jugador humano). Con jugadores IA, avanza EXACTAMENTE
+   * un turno por llamada, para que el juego se desarrolle turno a turno.
    */
   advance(state: GameState): void {
     if (state.winner || state.terminada) {
       state.phase = 'fin_partida';
       return;
     }
+    const jugadorInicial = state.currentPlayerId;
     let guard = 0;
-    while (guard++ < 80) {
+    while (guard++ < 60) {
       const p = getPlayer(state, state.currentPlayerId);
       if (state.pendingDecision) {
         const d = state.pendingDecision;
@@ -199,6 +201,8 @@ export class GameEngine {
           continue;
         case 'fin_turno':
           this.stepFinTurno(state);
+          // Un turno completo de IA: detenerse para que el jugador lo vea.
+          if (state.currentPlayerId !== jugadorInicial) return;
           continue;
         case 'fin_partida':
           return;
@@ -302,7 +306,8 @@ export class GameEngine {
     const p = getPlayer(state, playerId);
 
     // Mandato presidencial completado (victoria política principal).
-    if (p.isPresident && p.mandateTurns === 0 && p.mandateGoal > 0) {
+    // Salvaguarda: un mandato legítimo nunca termina antes de la ronda 4.
+    if (p.isPresident && p.mandateTurns === 0 && p.mandateGoal > 0 && state.ronda >= 4) {
       p.stats.mandatosCompletados += 1;
       p.mandateGoal = 0;
       if (p.resources.popularidad >= 45) {
