@@ -50,6 +50,11 @@ async function jugarPartidaCompleta(page: import('@playwright/test').Page, error
     }
     if (guard % 30 === 0) await page.waitForTimeout(100);
   }
+  if (alResultado) {
+    // La pantalla de victoria real se renderiza con desglose e historial.
+    await expect(page.locator('.ranking').first()).toBeVisible();
+    await expect(page.getByText('¿Cómo ganaste?')).toBeVisible();
+  }
   return alResultado;
 }
 

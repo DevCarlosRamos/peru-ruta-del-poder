@@ -158,19 +158,20 @@ test('vacancia: el presidente con riesgo extremo enfrenta la moción', async ({ 
   expect(erroresReales(errores)).toEqual([]);
 });
 
-test('victoria: pantalla de resultado con desglose', async ({ page }) => {
-  const errores: string[] = [];
-  capturarErrores(page, errores);
+test('seguridad: una partida ya ganada no se carga como "victoria fantasma"', async ({ page }) => {
   const s = nuevoEstado(19);
   s.winner = { playerId: s.players[0].id, motivo: 'objetivos', puntos: 123 };
   s.phase = 'fin_partida';
+  let alertMsg = '';
+  page.on('dialog', async (d) => {
+    alertMsg = d.message();
+    await d.accept();
+  });
   await cargarEstado(page, s);
-
-  await expect(page.locator('.result-hero')).toBeVisible({ timeout: 10_000 });
-  await expect(page.getByText('VICTORIA')).toBeVisible();
-  await expect(page.locator('.ranking').first()).toBeVisible();
-  await expect(page.getByText('¿Cómo ganaste?')).toBeVisible();
-  expect(erroresReales(errores)).toEqual([]);
+  // El guardado terminado se descarta: no aparece la pantalla de resultado al instante.
+  await page.waitForTimeout(1200);
+  expect(await page.locator('.result-hero').count()).toBe(0);
+  expect(alertMsg).toContain('No hay partida guardada');
 });
 
 test('guardado en la nube (D1) con limpieza posterior', async ({ page }) => {
