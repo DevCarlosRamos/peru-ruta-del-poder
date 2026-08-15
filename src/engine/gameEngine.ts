@@ -315,7 +315,11 @@ export class GameEngine {
         log(state, `¡${p.nombre} cumple el objetivo "${def?.titulo ?? oid}"! (+${BALANCE.recompensaObjetivo} S/)`, 'positivo', p.id);
       }
     }
-    if (p.objectives.length > 0 && p.objectives.every((o) => p.objectivesCompleted.includes(o))) {
+    if (
+      state.ronda >= 2 &&
+      p.objectives.length > 0 &&
+      p.objectives.every((o) => p.objectivesCompleted.includes(o))
+    ) {
       const puntos = computeScore(state, p.id);
       state.winner = { playerId: p.id, motivo: 'objetivos', puntos };
       log(state, `¡${p.nombre} cumple todos sus Objetivos de Poder y gana!`, 'positivo', p.id);

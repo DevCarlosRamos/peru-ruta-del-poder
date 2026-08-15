@@ -25,6 +25,13 @@ describe('Integración — partida completa automatizada', () => {
       expect(r.motivo).not.toBe('sin_fin');
     }
   }, 60_000);
+
+  it('ninguna partida IA vs IA termina en la primera ronda (regresión de victoria instantánea)', () => {
+    for (let semilla = 5000; semilla < 5025; semilla++) {
+      const r = simulateGame(semilla, { playerCount: 3 });
+      expect(r.rondas, `semilla ${semilla} terminó en ronda ${r.rondas} (motivo ${r.motivo})`).toBeGreaterThanOrEqual(2);
+    }
+  }, 60_000);
 });
 
 describe('Integración — determinismo del motor', () => {

@@ -7,7 +7,7 @@ import { openInvestigation, resolveInvestigation } from '../src/engine/investiga
 import { startElection, chooseCampaign } from '../src/engine/election';
 import { Rng } from '../src/engine/rng';
 import { BALANCE } from '../src/engine/constants';
-import { OBJECTIVE_MAP } from '../src/data/objectives';
+import { OBJECTIVE_MAP, checkObjective } from '../src/data/objectives';
 import { CARDS } from '../src/data/cards';
 import { applyDelta, getPlayer } from '../src/engine/utils';
 
@@ -141,7 +141,7 @@ describe('Motor — elecciones', () => {
   });
 });
 
-describe('Motor — objetivos y puntuación', () => {
+describe('Motor — objetivos', () => {
   it('los objetivos se asignan al crear la partida', () => {
     const { state } = makeGame();
     for (const p of state.players) {
@@ -149,6 +149,16 @@ describe('Motor — objetivos y puntuación', () => {
       for (const o of p.objectives) {
         expect(OBJECTIVE_MAP[o]).toBeDefined();
       }
+    }
+  });
+
+  it('los objetivos triviales no se completan en la ronda 1', () => {
+    const { state } = makeGame();
+    for (const p of state.players) {
+      // En ronda 1, ninguno de estos objetivos puede estar cumplido.
+      expect(checkObjective(p, state, 'deuda1')).toBe(false);
+      expect(checkObjective(p, state, 'supervivencia2')).toBe(false);
+      expect(checkObjective(p, state, 'supervivencia3')).toBe(false);
     }
   });
 

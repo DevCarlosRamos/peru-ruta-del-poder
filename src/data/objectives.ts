@@ -109,10 +109,11 @@ export const OBJECTIVES: ObjectiveDef[] = [
   {
     id: 'supervivencia2',
     titulo: 'Inmaculado',
-    descripcion: 'Nunca llegues a una investigación formal.',
+    descripcion: 'Llega a la tercera ronda sin haber tenido una investigación formal.',
     tipo: 'condicion',
     recompensa: 20,
-    condicion: (p, _g) =>
+    condicion: (p, g) =>
+      g.ronda >= 3 &&
       !p.investigations.some((i) =>
         ['investigacion_preliminar', 'investigacion_formal'].includes(i.estado),
       ),
@@ -120,10 +121,10 @@ export const OBJECTIVES: ObjectiveDef[] = [
   {
     id: 'supervivencia3',
     titulo: 'Técnica',
-    descripcion: 'Termina la partida sin haber quebrado.',
+    descripcion: 'Llega a la tercera ronda sin haber quebrado.',
     tipo: 'condicion',
     recompensa: 12,
-    condicion: (p, _g) => !p.quiebra,
+    condicion: (p, g) => g.ronda >= 3 && !p.quiebra,
   },
   {
     id: 'influencia1',
@@ -144,10 +145,11 @@ export const OBJECTIVES: ObjectiveDef[] = [
   {
     id: 'deuda1',
     titulo: 'Limpio de deudas',
-    descripcion: 'Queda sin deuda y conserva 50 de dinero.',
+    descripcion: 'Llega a la tercera ronda sin deuda y con 50 de dinero.',
     tipo: 'recurso',
     recompensa: 18,
-    condicion: (p, _g) => p.resources.deuda === 0 && p.resources.dinero >= 50,
+    condicion: (p, g) =>
+      g.ronda >= 3 && p.resources.deuda === 0 && p.resources.dinero >= 50,
   },
   {
     id: 'eleccion1',
