@@ -26,7 +26,7 @@ interface RollAnim {
 
 /** Pantalla de partida: "mesa de juego" con el tablero como protagonista. */
 export function Game({ game }: { game: GameController }) {
-  const { state, advance, choose, act, playHandCard, reset, canContinue } = game;
+  const { state, advance, choose, act, playHandCard, reset, canContinue, roll } = game;
   const [modoInspeccion, setModoInspeccion] = useState(false);
   const [inspectTile, setInspectTile] = useState<TileDef | null>(null);
   const [verMapa, setVerMapa] = useState(false);
@@ -77,7 +77,7 @@ export function Game({ game }: { game: GameController }) {
 
   const lanzarDado = () => {
     rollPendiente.current = true;
-    advance();
+    roll();
   };
 
 
@@ -146,7 +146,7 @@ export function Game({ game }: { game: GameController }) {
               Fase: <strong>{state.phase.replace('_', ' ')}</strong>
             </span>
             {botonTurno && esHumano && (
-              <button className="btn btn-primary btn-big" onClick={() => (state.phase === 'roll' && !current.isPresident ? lanzarDado() : advance())}>
+              <button className="btn btn-primary btn-big" onClick={() => (state.phase === 'roll' ? lanzarDado() : advance())}>
                 {botonTurno}
               </button>
             )}

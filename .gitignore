@@ -28,6 +28,9 @@ wrangler.wranglerconfig.json
 
 # Cobertura de tests
 coverage/
+test-results/
+playwright-report/
+e2e-*.png
 
 # Otros
 *.tsbuildinfo

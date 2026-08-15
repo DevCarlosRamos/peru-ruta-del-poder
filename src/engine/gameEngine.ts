@@ -195,6 +195,11 @@ export class GameEngine {
     }
   }
 
+  /** El jugador lanza el dado (humano): ejecuta el paso de `roll` del motor. */
+  roll(state: GameState): void {
+    this.stepRoll(state);
+  }
+
   private stepTurnoInicio(state: GameState): void {
     const p = getPlayer(state, state.currentPlayerId);
     startOfTurnEconomy(state, p.id);

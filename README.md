@@ -62,7 +62,8 @@ Cada turno eliges: ¿beneficio ahora y más riesgo, o juego seguro? ¿Invierto? 
 ```bash
 npm install          # dependencias
 npm run dev          # servidor de desarrollo (Vite)
-npm run test         # tests unitarios + integración (22 tests)
+npm test             # tests unitarios + integración (30 tests)
+npm run test:e2e     # smoke test en navegador real (Playwright + Chromium) contra producción
 npm run simulate     # 200 partidas automáticas de IA (balance)
 npm run check        # TypeScript estricto
 npm run build        # build de producción (dist/)
@@ -150,7 +151,10 @@ docs/                → Documentación del producto
 
 - Motor 100% separado de la UI (se prueba sin interfaz).
 - Partidas deterministas por semilla (misma semilla = misma partida).
-- Tests unitarios e integración con Vitest.
+- Tests unitarios e integración con Vitest (30 tests).
+- **Smoke test E2E con Playwright** en un navegador Chromium real contra producción:
+  carga → nueva partida → tablero (28 casillas) → turno completo (dado animado, ficha,
+  carta/decisión) → historial → inspección → mapa. Ejecuta con `npm run test:e2e`.
 - Simulador de balance con miles de partidas IA vs IA.
 - TypeScript estricto, sin dependencias innecesarias.
 

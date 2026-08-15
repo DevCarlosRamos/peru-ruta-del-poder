@@ -55,6 +55,15 @@ export function useGame() {
     commit(next);
   }, [state, commit]);
 
+  /** Lanza el dado del jugador actual (humano): ejecuta el paso de roll del motor. */
+  const roll = useCallback(() => {
+    if (!state || !engineRef.current) return;
+    const next = cloneState(state);
+    engineRef.current.roll(next);
+    next.rngState = engineRef.current.rng.getState();
+    commit(next);
+  }, [state, commit]);
+
   const choose = useCallback(
     (index: number) => {
       if (!state || !engineRef.current) return;
@@ -112,6 +121,6 @@ export function useGame() {
     }
   }, [state]);
 
-  return { screen, state, startGame, loadSaved, advance, choose, act, playHandCard, reset, goTo, canContinue };
+  return { screen, state, startGame, loadSaved, advance, roll, choose, act, playHandCard, reset, goTo, canContinue };
 }
 
