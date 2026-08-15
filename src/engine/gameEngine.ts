@@ -350,6 +350,8 @@ export class GameEngine {
         this.applyTileChoice(state, d, op);
         break;
     }
+    // Asegura que la decisión pendiente siempre se consume al elegir.
+    state.pendingDecision = null;
     state.phase = 'decision';
   }
 

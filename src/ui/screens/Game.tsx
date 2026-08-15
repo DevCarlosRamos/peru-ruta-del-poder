@@ -10,6 +10,7 @@ import { ActionPanel } from '../components/ActionPanel';
 import { ObjectivesPanel } from '../components/ObjectivesPanel';
 import { CardModal } from '../components/CardModal';
 import { DecisionModal } from '../components/DecisionModal';
+import { ElectionPanel } from '../components/ElectionPanel';
 import { InspectTileModal } from '../components/InspectTileModal';
 import { MapModal } from '../components/MapModal';
 import { HistoryModal } from '../components/HistoryModal';
@@ -35,6 +36,7 @@ export function Game({ game }: { game: GameController }) {
   const [sonido, setSonido] = useState(isSoundEnabled());
   const [guardando, setGuardando] = useState(false);
   const [rollAnim, setRollAnim] = useState<RollAnim | null>(null);
+  const [cartaVisible, setCartaVisible] = useState(false);
   const posRef = useRef<number | null>(null);
   const rollPendiente = useRef(false);
   const lastPlayerRef = useRef<string | null>(null);
@@ -109,9 +111,14 @@ export function Game({ game }: { game: GameController }) {
     choose(i);
   };
 
-  const hayCarta = state.pendingDecision?.tipo === 'carta' || state.pendingDecision?.tipo === 'carta_decision';
-
   const finRoll = useCallback(() => setRollAnim(null), []);
+
+  // Mantiene el CardModal montado durante la resolución (pendingDecision → null).
+  useEffect(() => {
+    const esCarta =
+      state?.pendingDecision?.tipo === 'carta' || state?.pendingDecision?.tipo === 'carta_decision';
+    if (esCarta) setCartaVisible(true);
+  }, [state?.pendingDecision?.id]);
 
   return (
     <div className="game-table">
@@ -167,13 +174,14 @@ export function Game({ game }: { game: GameController }) {
           {state.phase === 'decision' && state.pendingDecision === null && esHumano && (
             <ActionPanel state={state} onAct={act} />
           )}
+          <ElectionPanel state={state} />
         </main>
       </div>
 
       <PlayerHand state={state} onPlay={playHandCard} />
 
-      {!rollAnim && hayCarta && <CardModal state={state} onChoose={decidir} />}
-      {!rollAnim && state.pendingDecision && !hayCarta && <DecisionModal state={state} onChoose={decidir} />}
+      {!rollAnim && cartaVisible && <CardModal state={state} onChoose={decidir} onClose={() => setCartaVisible(false)} />}
+      {!rollAnim && state.pendingDecision && !cartaVisible && <DecisionModal state={state} onChoose={decidir} />}
       {inspectTile && <InspectTileModal tile={inspectTile} onClose={() => setInspectTile(null)} />}
       {verMapa && (
         <MapModal

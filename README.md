@@ -62,8 +62,8 @@ Cada turno eliges: ¿beneficio ahora y más riesgo, o juego seguro? ¿Invierto? 
 ```bash
 npm install          # dependencias
 npm run dev          # servidor de desarrollo (Vite)
-npm test             # tests unitarios + integración (30 tests)
-npm run test:e2e     # smoke test en navegador real (Playwright + Chromium) contra producción
+npm test             # tests unitarios + integración (32 tests)
+npm run test:e2e     # suite E2E completa en navegador real (Playwright + Chromium): 17 tests
 npm run simulate     # 200 partidas automáticas de IA (balance)
 npm run check        # TypeScript estricto
 npm run build        # build de producción (dist/)
@@ -151,10 +151,14 @@ docs/                → Documentación del producto
 
 - Motor 100% separado de la UI (se prueba sin interfaz).
 - Partidas deterministas por semilla (misma semilla = misma partida).
-- Tests unitarios e integración con Vitest (30 tests).
-- **Smoke test E2E con Playwright** en un navegador Chromium real contra producción:
-  carga → nueva partida → tablero (28 casillas) → turno completo (dado animado, ficha,
-  carta/decisión) → historial → inspección → mapa. Ejecuta con `npm run test:e2e`.
+- Tests unitarios e integración con Vitest (32 tests).
+- **Suite E2E con Playwright** en un navegador Chromium real contra producción (17 tests):
+  - **Smoke:** carga → nueva partida → tablero (28 casillas) → turno completo → inspección/mapa.
+  - **Flujos:** carta probabilística con flip, mano (guardar/jugar), elecciones con campaña,
+    investigación/tribunal, vacancia, victoria con desglose, guardado en la nube (D1 con
+    limpieza), reglas, sonido, zoom.
+  - **Fuzz:** 5 partidas IA vs IA completas verificando cero errores de consola/runtime.
+  - Los tests usan estados inyectados generados con el motor real (deterministas).
 - Simulador de balance con miles de partidas IA vs IA.
 - TypeScript estricto, sin dependencias innecesarias.
 

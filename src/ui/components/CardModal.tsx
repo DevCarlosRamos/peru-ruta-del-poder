@@ -9,6 +9,7 @@ type Fase = 'carta' | 'resolviendo' | 'resultado' | 'cerrado';
 interface Props {
   state: GameState;
   onChoose: (index: number) => void;
+  onClose: () => void;
 }
 
 /** Barra de probabilidad: ██████░░░░ 30% */
@@ -29,35 +30,30 @@ function ProbBar({ prob }: { prob: number }) {
  * entrada → volteo → decisión → resolución → resultado → cierre.
  * La lógica probabilística vive en el motor (applyCardChoice); la UI solo anima.
  */
-export function CardModal({ state, onChoose }: Props) {
+export function CardModal({ state, onChoose, onClose }: Props) {
   const d = state.pendingDecision;
-  const card = d?.cardId ? CARD_MAP[d.cardId] : null;
-  const p = d ? getPlayer(state, d.jugadorId) : null;
-
+  const cartaRef = useRef<string | null>(null);
+  const [cartaActual, setCartaActual] = useState<string | null>(null);
   const [fase, setFase] = useState<Fase>('carta');
-  const [flipped, setFlipped] = useState(false);
   const [logBefore, setLogBefore] = useState(0);
   const [mensajes, setMensajes] = useState<string[]>([]);
-  const [cartaActual, setCartaActual] = useState<string | null>(null);
   const [resultadoFase, setResultadoFase] = useState<'exito' | 'fallo' | null>(null);
   const audioPlayed = useRef(false);
 
-  // Nueva carta → animación de entrada y volteo.
+  // Nueva carta → reinicia las fases. El volteo visual es una animación CSS pura.
   useEffect(() => {
-    if (d?.cardId && cartaActual !== d.cardId) {
+    if (d?.cardId && cartaRef.current !== d.cardId) {
+      cartaRef.current = d.cardId;
       setCartaActual(d.cardId);
       setFase('carta');
-      setFlipped(false);
       setMensajes([]);
       setResultadoFase(null);
       audioPlayed.current = false;
       playSound('carta');
-      const t = setTimeout(() => setFlipped(true), 350);
-      return () => clearTimeout(t);
     }
-  }, [d?.cardId, cartaActual]);
+  }, [d?.cardId]);
 
-  // Al resolverse (desaparece pendingDecision) → mostrar resultado con mensajes del log.
+  // Al resolverse (desaparece pendingDecision) → mostrar resultado con el log.
   useEffect(() => {
     if (!state.pendingDecision && fase === 'resolviendo') {
       const nuevos = state.log.slice(logBefore);
@@ -74,9 +70,14 @@ export function CardModal({ state, onChoose }: Props) {
     }
   }, [state.pendingDecision, state.log.length, fase, logBefore]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (!d || !card || !p) return null;
-  if (d.tipo !== 'carta' && d.tipo !== 'carta_decision') return null;
-  if (fase === 'cerrado') return null;
+  // La carta mostrada: la pendiente o, durante la resolución, la ya elegida.
+  const cardId = d?.cardId ?? cartaActual;
+  const card = cardId ? CARD_MAP[cardId] : null;
+  const p = d ? getPlayer(state, d.jugadorId) : null;
+
+  if (fase === 'cerrado' || !card) return null;
+  // En fase "carta" necesitamos la decisión pendiente (sus opciones).
+  if (fase === 'carta' && (!d || !p)) return null;
 
   const estilo = CATEGORY_STYLE[card.categoria];
 
@@ -87,10 +88,15 @@ export function CardModal({ state, onChoose }: Props) {
     setTimeout(() => onChoose(i), 1100);
   };
 
+  const cerrar = () => {
+    setFase('cerrado');
+    onClose();
+  };
+
   return (
     <div className="modal-overlay">
       <div className="card-modal-wrap" role="dialog" aria-modal="true" aria-label={card.nombre}>
-        <div className={`card-physical ${flipped ? 'flipped' : ''} ${fase === 'resultado' ? 'resuelta' : ''}`}>
+        <div className={`card-physical ${fase === 'resultado' ? 'resuelta' : ''}`}>
           <div className="card-front">
             <div className="card-front-head" style={{ background: `linear-gradient(135deg, ${estilo.color}, #141a22)` }}>
               <span className="badge">{estilo.etiqueta}</span>
@@ -110,7 +116,7 @@ export function CardModal({ state, onChoose }: Props) {
           </div>
         </div>
 
-        {fase === 'carta' && (
+        {fase === 'carta' && d && p && (
           <div className="card-panel">
             <h4>{card.nombre}</h4>
             <p className="card-descripcion">{card.descripcion}</p>
@@ -156,7 +162,7 @@ export function CardModal({ state, onChoose }: Props) {
                 <li key={i}>{m}</li>
               ))}
             </ul>
-            <button className="btn btn-primary btn-big" onClick={() => setFase('cerrado')}>
+            <button className="btn btn-primary btn-big" onClick={cerrar}>
               Continuar →
             </button>
           </div>
@@ -165,3 +171,4 @@ export function CardModal({ state, onChoose }: Props) {
     </div>
   );
 }
+

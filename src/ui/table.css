@@ -434,10 +434,16 @@
   width: 100%;
   height: 210px;
   transform-style: preserve-3d;
-  transition: transform 0.55s cubic-bezier(0.2, 0.8, 0.3, 1);
+  /* Entra con el dorso y se voltea hacia el frente (animación CSS pura). */
+  animation: card-entra 0.3s ease-out, card-flip 0.55s cubic-bezier(0.2, 0.8, 0.3, 1) 0.45s forwards;
 }
-.card-physical.flipped {
-  transform: rotateY(180deg);
+@keyframes card-entra {
+  from { transform: scale(0.85) translateY(24px); opacity: 0.2; }
+  to { transform: scale(1) translateY(0); opacity: 1; }
+}
+@keyframes card-flip {
+  from { transform: rotateY(0deg); }
+  to { transform: rotateY(180deg); }
 }
 .card-front,
 .card-back {
