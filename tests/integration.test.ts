@@ -26,12 +26,21 @@ describe('Integración — partida completa automatizada', () => {
     }
   }, 60_000);
 
-  it('ninguna partida IA vs IA termina en la primera ronda (regresión de victoria instantánea)', () => {
-    for (let semilla = 5000; semilla < 5025; semilla++) {
+  it('ninguna partida IA vs IA termina antes de la ronda 4 (regresión de victoria instantánea)', () => {
+    for (let semilla = 5000; semilla < 5050; semilla++) {
       const r = simulateGame(semilla, { playerCount: 3 });
-      expect(r.rondas, `semilla ${semilla} terminó en ronda ${r.rondas} (motivo ${r.motivo})`).toBeGreaterThanOrEqual(2);
+      expect(r.rondas, `semilla ${semilla} terminó en ronda ${r.rondas} (motivo ${r.motivo})`).toBeGreaterThanOrEqual(4);
     }
-  }, 60_000);
+  }, 90_000);
+
+  it('ninguna partida IA vs IA gana por objetivos antes de la ronda 5 (bug Palacio+Balotaje)', () => {
+    for (let semilla = 10_000; semilla < 10_060; semilla++) {
+      const r = simulateGame(semilla, { playerCount: 3 });
+      if (r.motivo === 'objetivos') {
+        expect(r.rondas, `semilla ${semilla} ganó por objetivos en ronda ${r.rondas}`).toBeGreaterThanOrEqual(5);
+      }
+    }
+  }, 90_000);
 });
 
 describe('Integración — determinismo del motor', () => {

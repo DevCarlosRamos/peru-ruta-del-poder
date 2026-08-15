@@ -49,9 +49,22 @@ export class GameEngine {
       .sort((a, b) => b.s - a.s);
     orden.forEach((o, i) => (o.p.orden = i + 1));
 
-    const pool = rng.shuffle(OBJECTIVE_IDS);
+    // Reparto de Objetivos de Poder evitando pares que se completan solos
+    // con la primera elección (ej. "Palacio" + "Balotaje").
+    const PRESIDENCIALES = new Set(['poder2', 'eleccion1', 'eleccion2']);
+    const otrosObjetivos = rng.shuffle(OBJECTIVE_IDS.filter((o) => !PRESIDENCIALES.has(o)));
+    const presObjetivos = rng.shuffle(OBJECTIVE_IDS.filter((o) => PRESIDENCIALES.has(o)));
+    const pool = [...otrosObjetivos, ...presObjetivos];
     for (const p of players) {
-      p.objectives = pool.splice(0, BALANCE.objetivosPorJugador);
+      const dos = pool.splice(0, BALANCE.objetivosPorJugador);
+      // Guardia: nunca dos objetivos de la familia presidencial a la vez.
+      if (dos.length === 2 && dos.every((o) => PRESIDENCIALES.has(o))) {
+        const otro = pool.findIndex((o) => !PRESIDENCIALES.has(o));
+        if (otro >= 0) {
+          dos[1] = pool.splice(otro, 1)[0];
+        }
+      }
+      p.objectives = dos;
     }
 
     const state: GameState = {
@@ -316,7 +329,7 @@ export class GameEngine {
       }
     }
     if (
-      state.ronda >= 2 &&
+      state.ronda >= 5 &&
       p.objectives.length > 0 &&
       p.objectives.every((o) => p.objectivesCompleted.includes(o))
     ) {
